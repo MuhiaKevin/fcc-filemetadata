@@ -2,38 +2,34 @@
 
 const express = require('express');
 const cors = require('cors');
-const fileUpload = require('express-fileupload');
+const multer = require('multer');
 
-
-// require and use "multer"...
+const upload = multer();
 
 const app = express();
 
 app.use(cors());
 app.use('/public', express.static(process.cwd() + '/public'));
-app.use(fileUpload())
 
 app.get('/', function (req, res) {
   res.sendFile(process.cwd() + '/views/index.html');
 });
 
-app.get('/hello', function (req, res) {
-  res.json({ greetings: "Hello, API" });
-});
+app.post('/api/fileanalyse', upload.single('upfile'), (req, res) => {
 
+  try {
+    res.json({
+      name: req.file.originalname,
+      size: req.file.size
+    });
 
-app.post('/api/fileanalyse', (req, res) => {
-  if (req.files === null) {
-    res.status(404).json({error : "File Required for upload",  status : 404});
+  } catch (error) {
+    res.status(500).json({ error: "Some error occured", statusCode: 500 })
   }
-  console.log(req.files)
-  res.json({name : req.files.upfile.name, size : req.files.upfile.size})
 
-})
 
+});
 
 app.listen(process.env.PORT || 3000, function () {
   console.log('Node.js listening ...');
 });
-
-
